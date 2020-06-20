@@ -1,0 +1,134 @@
+Sub Stock():
+
+'define this worksheet as a worksheet
+    Dim WS As Worksheet
+
+'define variables
+
+    Dim ticker As String
+    Dim totVolume As Double
+    Dim yearlyOpen As Double
+    Dim yearlyClose As Double
+    Dim tickerCounter As Integer
+    Dim outputRowCounter As Integer
+    Dim tickerSum As String
+    Dim percentChange As Long
+     
+     
+     'Loop through worksheets
+    For Each WS In Worksheets
+
+                    'set up summary table
+                    WS.Range("i1").Value = "Ticker"
+                    WS.Range("j1").Value = "Yearly change"
+                    WS.Range("k1").Value = "Percentage change"
+                    WS.Range("l1").Value = "Total stock volue"
+   
+                    'set greatest table
+                    WS.Range("P1").Value = "Ticker"
+                    WS.Range("Q1").Value = "Value"
+                    WS.Range("O2").Value = "Greatest % Increase"
+                    WS.Range("O3").Value = "Greatest % decrease"
+                    WS.Range("O4").Value = "Greatest total volume"
+   
+                    'determine last rows
+                     Lastrow = WS.Cells(Rows.Count, 1).End(xlUp).Row
+                     lastsummaryrow = WS.Cells(Rows.Count, 11).End(xlUp).Row
+   
+
+                    ' give values to volume, ticker count and output row for summary table
+                    totVolume = 0
+                    tickerCounter = 1
+                    outputRowCounter = 2
+   
+         
+            'start loop 1
+            For i = 2 To Lastrow
+            'point to ticker
+            ticker = WS.Cells(i, 1).Value
+                    
+                    'if statemenmt for ticker change
+                    If WS.Cells(i + 1, 1).Value = WS.Cells(i, 1).Value Then
+                            'set opening price to be yearlyopening of new ticker
+                            If tickerCounter = 1 Then
+                            yearlyOpen = WS.Cells(i, 3).Value
+                             End If
+                                    
+                     'keep track of tickernumber
+                     tickerCounter = tickerCounter + 1
+              
+                     'add volume data
+                     totVolume = totVolume + WS.Cells(i, 7).Value
+                     
+                    
+              
+                     Else
+                    'determining ticker stats
+                    yearlyClose = WS.Cells(i, 6).Value
+                    'totalVolume = totalVolume + WS.Cells(i, 7).Value
+                    totVolume = totVolume + WS.Cells(i, 7).Value
+                    'percentChange = ((yearlyClose - yearlyOpen) / yearlyOpen) * 100
+                    
+                    'stats to cells
+                    WS.Range("i" & outputRowCounter).Value = ticker
+                    WS.Range("j" & outputRowCounter).Value = yearlyClose - yearlyOpen
+                    WS.Range("k" & outputRowCounter).Value = (yearlyClose - yearlyOpen) / yearlyOpen
+                    WS.Range("l" & outputRowCounter).Value = totVolume
+                
+                    'format percentage change cells to show percentage
+                    WS.Range("k" & outputRowCounter).NumberFormat = "0.00%"
+                    
+                                  
+                    ' reset total volume for next loop
+                     totalVolume = 0
+                    ' reset ticker counter for next loop
+                    tickerCounter = 1
+                    'point next loop to next row of stat table
+                     outputRowCounter = outputRowCounter + 1
+                     End If
+            Next i
+    
+            For k = 2 To lastsummaryrow
+                    If WS.Cells(k, 11).Value <= 0 Then
+                    WS.Cells(k, 11).Interior.ColorIndex = 3
+                    Else
+                    WS.Cells(k, 11).Interior.ColorIndex = 4
+                
+                    End If
+           
+            Next k
+            
+                    
+            
+                    ' Summary of Summary table
+    
+                    PerChangeRange = WS.Range("K2", "K" & lastsummaryrow)
+    
+                    TotStChangeRange = WS.Range("L2", "L" & lastsummaryrow)
+    
+                    WS.Cells(2, 17).Value = Application.WorksheetFunction.Max(PerChangeRange)
+                    WS.Cells(3, 17).Value = Application.WorksheetFunction.Min(PerChangeRange)
+                    WS.Cells(4, 17).Value = Application.WorksheetFunction.Max(TotStChangeRange)
+                    
+                    'formatting percentagecells
+                    WS.Cells(2, 17).NumberFormat = "0.00%"
+                    WS.Cells(3, 17).NumberFormat = "0.00%"
+                    
+            For m = 2 To lastsummaryrow
+            tickerSum = WS.Cells(m, 9)
+                    If WS.Cells(m, 11).Value = WS.Range("q2").Value Then
+                    WS.Range("p2").Value = tickerSum
+                    End If
+                    
+                    If WS.Cells(m, 11).Value = WS.Range("q3").Value Then
+                    WS.Range("p3").Value = tickerSum
+                    End If
+                    
+                    If WS.Cells(m, 12).Value = WS.Range("q4").Value Then
+                    WS.Range("p4").Value = tickerSum
+                    End If
+            Next m
+    Next WS
+    
+End Sub
+
